@@ -1,0 +1,23 @@
+# Entornos virtuales
+venv/
+env/
+.env
+
+# Archivos de Python
+__pycache__/
+*.pyc
+
+# Archivos de datos locales (no queremos subir megas de datos a GitHub)
+data/
+*.parquet
+*.csv
+
+# Credenciales y secretos (¡CRÍTICO!)
+*.json
+*service_account*.json
+credentials/
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
