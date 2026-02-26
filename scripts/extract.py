@@ -1,33 +1,53 @@
 import requests
-import json
 import pandas as pd
+import os
+from datetime import datetime, timedelta
 
-url = 'https://archive-api.open-meteo.com/v1/archive'
-parameters = {
-    "latitude": -36.7,
-    "longitude": -71.9,
-    "start_date": "2024-01-01",
-    "end_date": "2024-01-05",
-    "daily": ["temperature_2m_max", "precipitation_sum"],
+# 1. Configuración de parámetros
+LAT = 40.4168
+LON = -3.7038
+URL = "https://archive-api.open-meteo.com/v1/archive"
+
+# 2. Fechas dinámicas (desde hace 3 años hasta ayer)
+fecha_fin = datetime.now() - timedelta(days=1)
+fecha_inicio = fecha_fin - timedelta(days=365*3)
+
+fecha_fin_str = fecha_fin.strftime('%Y-%m-%d')
+fecha_inicio_str = fecha_inicio.strftime('%Y-%m-%d')
+
+parametros = {
+    "latitude": LAT,
+    "longitude": LON,
+    "start_date": fecha_inicio_str,
+    "end_date": fecha_fin_str,
+    "daily": ["temperature_2m_max", "temperature_2m_min", "precipitation_sum"],
     "timezone": "auto"
 }
 
-print('Connecting to API')
-answer = requests.get(url, params=parameters)
-print(f"Status Code: {answer.status_code}")
+print(f"Extrayendo datos desde {fecha_inicio_str} hasta {fecha_fin_str}...")
 
-if answer.status_code == 200:
-    raw_data = answer.json()
-    daily_data = raw_data['daily']
-    df = pd.DataFrame(raw_data['daily'])
-    print('Data to Table')
-    print(df.head())  
-    print('-'*50)
+# 3. Petición a la API
+respuesta = requests.get(URL, params=parametros)
 
-    print('datatypes')
-    print(df.dtypes)
-    print('-'*50)
+if respuesta.status_code == 200:
+    datos_crudos = respuesta.json()
+    
+    # 4. Transformación a DataFrame
+    df = pd.DataFrame(datos_crudos["daily"])
+    
+    # 5. Añadir columnas de auditoría (Buenas prácticas)
+    df['extraction_date'] = datetime.now()
+    df['latitude'] = LAT
+    df['longitude'] = LON
+    
+    # 6. Guardar en formato Parquet
+    os.makedirs('data', exist_ok=True) # Crea la carpeta 'data' si no existe
+    ruta_archivo = os.path.join('data', 'clima_historico.parquet')
+    
+    # Necesitamos instalar pyarrow para guardar en parquet, ya lo pusimos en requirements
+    df.to_parquet(ruta_archivo, index=False)
+    
+    print(f"¡Éxito! {len(df)} filas guardadas en '{ruta_archivo}'.")
+    
 else:
-    print(f"Error: {answer.status_code}")
-
-
+    print(f"Error en la API. Código: {respuesta.status_code}")
