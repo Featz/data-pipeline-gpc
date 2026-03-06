@@ -43,8 +43,7 @@ if respuesta.status_code == 200:
     # 6. Guardar en formato Parquet
     os.makedirs('data', exist_ok=True) # Crea la carpeta 'data' si no existe
     ruta_archivo = os.path.join('data', 'clima_historico.parquet')
-    
-    # Necesitamos instalar pyarrow para guardar en parquet, ya lo pusimos en requirements
+
     df.to_parquet(ruta_archivo, index=False)
     
     print(f"¡Éxito! {len(df)} filas guardadas en '{ruta_archivo}'.")
