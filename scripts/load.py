@@ -2,24 +2,32 @@ import os
 import pandas as pd
 from google.cloud import bigquery
 import logging
+from dotenv import load_dotenv
+
+# 1. Cargar las variables de entorno desde el archivo .env
+load_dotenv()
 
 # Configuración de logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# 1. Autenticación: Le decimos a Python dónde está la llave JSON
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "data-weather-demo-78de1f5e8858.json"
+# 2. Obtener configuración (Twelve-Factor App)
+PROJECT_ID = os.getenv("GOOGLE_PROJECT_ID")
+DATASET_ID = os.getenv("GOOGLE_DATASET_ID")
+TABLE_ID = "historical_weather" # Esto puede quedarse en el código al ser el nombre de la tabla final
 
-# 2. Configuración de destino (¡CAMBIA EL PROJECT_ID!)
-PROJECT_ID = "933465459702"  
-DATASET_ID = "raw_data"
-TABLE_ID = "historical_weather"
+# 3. Validación de seguridad (Programación defensiva)
+if not PROJECT_ID or not DATASET_ID:
+    raise ValueError("Faltan variables de entorno críticas. Verifica tu archivo .env")
+
+# Nota: No necesitamos hacer os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = ... 
+# porque load_dotenv() ya lo ha inyectado en el sistema automáticamente.
 
 def load_parquet_to_bigquery():
     """Lee el archivo Parquet local y lo sube a BigQuery."""
-    client = bigquery.Client()
+    # BigQuery tomará automáticamente el PROJECT_ID y las credenciales del entorno
+    client = bigquery.Client(project=PROJECT_ID)
     
-    # Ruta de la tabla en la nube: proyecto.dataset.tabla
     table_ref = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}"
     file_path = os.path.join('data', 'clima_historico.parquet')
     
@@ -32,14 +40,13 @@ def load_parquet_to_bigquery():
     
     logger.info(f"Subiendo {len(df)} filas a BigQuery ({table_ref})...")
     
-    # Configuración: WRITE_TRUNCATE reemplaza la tabla si ya existe
     job_config = bigquery.LoadJobConfig(
         write_disposition="WRITE_TRUNCATE",
     )
 
     try:
         job = client.load_table_from_dataframe(df, table_ref, job_config=job_config)
-        job.result()  # Esperamos a que Google termine
+        job.result()
         logger.info("¡Carga completada exitosamente en BigQuery!")
     except Exception as e:
         logger.error(f"Error al subir a BigQuery: {e}")
