@@ -55,8 +55,8 @@ Para configurar e iniciar el desarrollo en local:
 1. **Clonar este repositorio**
 
    ```bash
-   git clone <url-del-repo>
-   cd modern-data-pipeline-weather
+   git clone https://github.com/Featz/data-pipeline-gpc
+   cd data-pipeline-gpc
    ```
 
 2. **Crear e inicializar el entorno virtual**
