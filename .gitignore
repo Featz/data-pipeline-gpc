@@ -21,3 +21,6 @@ credentials/
 dbt/target/
 dbt/dbt_packages/
 dbt/logs/
+
+# log
+logs/
