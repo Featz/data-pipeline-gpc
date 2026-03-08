@@ -1,21 +1,30 @@
 version: 2
 
 sources:
-  - name: raw_weather
-    description: "Datos crudos extraídos de la API del clima"
-    database: tu_project_id_de_gcp # Reemplaza con tu ID real
-    schema: tu_dataset_crudo       # Reemplaza con tu dataset real
+  - name: weather_source         
+    schema: raw_data             # Tu dataset real en GCP
     tables:
-      - name: weather_data
+      - name: historical_weather   # Tu tabla real en GCP
+        description: "Datos climáticos históricos crudos extraídos de la API."
 
 models:
-  - name: stg_weather
-    description: "Modelo staging limpio de datos climáticos diarios."
+  - name: stg_weather            # El nombre de tu archivo SQL (sin el .sql)
+    description: "Modelo staging con los datos climáticos limpios y estandarizados."
     columns:
       - name: observation_date
-        description: "Fecha de la observación meteorológica."
+        description: "Fecha de la observación meteorológica (casteada desde la columna time)."
         tests:
-          - unique
-          - not_null
-      - name: temperature_celsius
-        description: "Temperatura promedio del día en grados Celsius."
+          - unique               # Test: Verifica que no haya fechas duplicadas
+          - not_null             # Test: Verifica que la fecha no venga vacía
+      - name: max_temperature_c
+        description: "Temperatura máxima en grados Celsius."
+      - name: min_temperature_c
+        description: "Temperatura mínima en grados Celsius."
+      - name: total_precipitation_mm
+        description: "Precipitación total en milímetros."
+      - name: latitude
+        description: "Latitud de la ubicación."
+      - name: longitude
+        description: "Longitud de la ubicación."
+      - name: extraction_timestamp
+        description: "Fecha y hora exacta de la extracción."

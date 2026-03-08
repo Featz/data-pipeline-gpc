@@ -1,6 +1,6 @@
 WITH raw_data AS (
     -- Aquí llamamos a la fuente tal cual la definimos en el schema.yml
-    SELECT * FROM {{ source('weather_source', 'historical_data') }}
+    SELECT * FROM {{ source('weather_source', 'historical_weather') }}
 )
 
 SELECT
