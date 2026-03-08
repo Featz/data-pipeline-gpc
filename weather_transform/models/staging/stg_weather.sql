@@ -11,7 +11,7 @@ SELECT
     CAST(temperature_2m_min AS FLOAT64) AS min_temperature_c,
     
     -- Corregimos el nombre de la columna de precipitación
-    CAST(preciptacion_sum AS FLOAT64) AS total_precipitation_mm,
+    CAST(precipitation_sum AS FLOAT64) AS total_precipitation_mm,
     
     CAST(latitude AS FLOAT64) AS latitude,
     CAST(longitude AS FLOAT64) AS longitude,
