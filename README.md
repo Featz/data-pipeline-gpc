@@ -21,6 +21,8 @@ El pipeline de datos sigue los siguientes pasos estructurales:
 1. **Extract (`scripts/extract.py`)**: Un script desarrollado en **Python** consume datos meteorológicos desde una API pública gratuita.
 2. **Load (`scripts/load.py`)**: Los datos crudos (en formato Parquet) son cargados de forma estructurada directamente a **Google BigQuery** (Data Warehouse). El proceso utiliza `python-dotenv` para cargar variables de entorno seguras desde `.env` (sin exponer credenciales en el código), y la librería de BigQuery en Python para crear/sobrescribir tablas.
 3. **Transform (`weather_transform/`)**: Se utiliza **dbt** (Data Build Tool) conectado a BigQuery para limpiar, transformar y aplicar reglas de negocio sobre los datos crudos. Hemos inicializado un proyecto dbt estructurado, configurado bajo `weather_transform/dbt_project.yml`.
+   - **Staging (`models/staging/`)**: Contiene el modelo `stg_weather.sql` para limpieza y estandarización (casteo de tipos, renombramientos) sobre los datos crudos (`raw_data`).
+   - **Tests y Documentación**: Definidos en `schema.yaml` para asegurar la calidad de datos (ej. tests de no nulos o duplicados en las fechas y validación de estructura de columnas).
 4. **Orchestrate (`dags/`)**: Todo el flujo (Extracción, Carga y Transformación en dbt) está coordinado por **Apache Airflow**, programado para ejecutarse diariamente (Daily ETL).
 
 ## 🛠️ Stack Tecnológico
@@ -42,6 +44,7 @@ modern-data-pipeline-weather/
 ├── data/                  # Directorio para almacenar data temporal localmente en formato CSV/Parquet antes de su carga final a BigQuery.
 ├── scripts/               # Scripts de Python encargados del consumo de la API (extract.py) y la carga a GCP (load.py) mediante variables .env.
 ├── weather_transform/     # Proyecto dbt inicializado con la estructura base, incluyendo dbt_project.yml para perfiles de conexión y modelos.
+│   └── models/staging/    # Modelos de primera capa (stg_weather.sql) y definiciones de fuentes y tests (schema.yaml).
 ├── .env.example           # Plantilla de variables de entorno para usar dotenv, requeridas para GCP (Project ID, Dataset y Credenciales).
 ├── tests/                 # Scripts con pruebas unitarias de los procesos en Python y la validación de la consistencia de los datos.
 ├── venv/                  # Entorno virtual de Python con las dependencias instaladas.
@@ -83,7 +86,9 @@ Para configurar e iniciar el desarrollo en local:
    - El proyecto ya está inicializado dentro del directorio `weather_transform/` y configurado en base al archivo `dbt_project.yml`.
    - Dirígete a la carpeta respectiva: `cd weather_transform`
    - Configura el archivo `profiles.yml` (usualmente en `~/.dbt/profiles.yml`) para establecer la conexión a BigQuery.
-   - Verifica el acceso con `dbt debug` y posteriormente transforma los datos ejecutando `dbt run`.
+   - Verifica el acceso con `dbt debug`.
+   - Ejecuta las pruebas de calidad de datos con `dbt test` (verificará las reglas de `schema.yaml`).
+   - Transforma los datos y construye los modelos ejecutando `dbt run`.
 
 6. **Levantar localmente Apache Airflow**
    - Se puede inicializar la DB de Airflow mediante `airflow db init` y levantar el servidor web/scheduler local, o bien correr todo el empaquetado mediante una imagen de Docker.
