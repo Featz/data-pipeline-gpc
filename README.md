@@ -22,7 +22,8 @@ El pipeline de datos sigue los siguientes pasos estructurales:
 2. **Load (`scripts/load.py`)**: Los datos crudos (en formato Parquet) son cargados de forma estructurada directamente a **Google BigQuery** (Data Warehouse). El proceso utiliza `python-dotenv` para cargar variables de entorno seguras desde `.env` (sin exponer credenciales en el código), y la librería de BigQuery en Python para crear/sobrescribir tablas.
 3. **Transform (`weather_transform/`)**: Se utiliza **dbt** (Data Build Tool) conectado a BigQuery para limpiar, transformar y aplicar reglas de negocio sobre los datos crudos. Hemos inicializado un proyecto dbt estructurado, configurado bajo `weather_transform/dbt_project.yml`.
    - **Staging (`models/staging/`)**: Contiene el modelo `stg_weather.sql` para limpieza y estandarización (casteo de tipos, renombramientos) sobre los datos crudos (`raw_data`).
-   - **Tests y Documentación**: Definidos en `schema.yaml` para asegurar la calidad de datos (ej. tests de no nulos o duplicados en las fechas y validación de estructura de columnas).
+   - **Marts / Capa Oro (`models/marts/`)**: Contiene el modelo `mart_monthly_climate_summary.sql`, que materializa como tabla (`table`) y agrega métricas climáticas a nivel mensual (promedios, anomalías, días de lluvia) listas para analítica y BI.
+   - **Tests y Documentación**: Definidos en los archivos `schema.yaml` y `schema.yml` de cada capa para asegurar la calidad de los datos (ej. tests de integridad, no nulos y unicidad en la primera capa y en los hechos consolidados).
 4. **Orchestrate (`dags/`)**: Todo el flujo (Extracción, Carga y Transformación en dbt) está coordinado por **Apache Airflow**, programado para ejecutarse diariamente (Daily ETL).
 
 ## 🛠️ Stack Tecnológico
@@ -44,7 +45,8 @@ modern-data-pipeline-weather/
 ├── data/                  # Directorio para almacenar data temporal localmente en formato CSV/Parquet antes de su carga final a BigQuery.
 ├── scripts/               # Scripts de Python encargados del consumo de la API (extract.py) y la carga a GCP (load.py) mediante variables .env.
 ├── weather_transform/     # Proyecto dbt inicializado con la estructura base, incluyendo dbt_project.yml para perfiles de conexión y modelos.
-│   └── models/staging/    # Modelos de primera capa (stg_weather.sql) y definiciones de fuentes y tests (schema.yaml).
+│   ├── models/staging/    # Modelos de primera capa (stg_weather.sql) y definiciones de fuentes y tests (schema.yaml).
+│   └── models/marts/      # Modelos de agregación Capa Oro (mart_monthly_climate_summary.sql) y definiciones correspondientes (schema.yml).
 ├── .env.example           # Plantilla de variables de entorno para usar dotenv, requeridas para GCP (Project ID, Dataset y Credenciales).
 ├── tests/                 # Scripts con pruebas unitarias de los procesos en Python y la validación de la consistencia de los datos.
 ├── venv/                  # Entorno virtual de Python con las dependencias instaladas.
@@ -52,7 +54,7 @@ modern-data-pipeline-weather/
 └── .gitignore             # Archivos y carpetas ignorados para el control de versiones en git.
 ```
 
-## 🚀 Próximos pasos (Cómo usar este repositorio)
+## 🚀 Cómo usar este repo
 
 Para configurar e iniciar el desarrollo en local:
 
