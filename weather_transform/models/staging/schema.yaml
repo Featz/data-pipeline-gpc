@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: raw_weather
+    description: "Datos crudos extraídos de la API del clima"
+    database: tu_project_id_de_gcp # Reemplaza con tu ID real
+    schema: tu_dataset_crudo       # Reemplaza con tu dataset real
+    tables:
+      - name: weather_data
+
+models:
+  - name: stg_weather
+    description: "Modelo staging limpio de datos climáticos diarios."
+    columns:
+      - name: observation_date
+        description: "Fecha de la observación meteorológica."
+        tests:
+          - unique
+          - not_null
+      - name: temperature_celsius
+        description: "Temperatura promedio del día en grados Celsius."
