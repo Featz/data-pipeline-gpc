@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: mart_monthly_climate_summary
+    description: "Resumen mensual del clima: promedios, días de lluvia y anomalías. Capa Oro lista para BI."
+    columns:
+      - name: observation_year
+        description: "Año de la observación."
+        tests:
+          - not_null
+      - name: observation_month
+        description: "Mes de la observación (1-12)."
+        tests:
+          - not_null
+      - name: avg_monthly_temperature
+        description: "Temperatura promedio del mes en grados Celsius."
+      - name: rainy_days
+        description: "Cantidad de días en el mes con precipitación mayor a 0 mm."
+      - name: temperature_anomaly
+        description: "Diferencia entre la temperatura promedio del mes y el promedio histórico global."
