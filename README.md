@@ -92,5 +92,8 @@ Para configurar e iniciar el desarrollo en local:
    - Ejecuta las pruebas de calidad de datos con `dbt test` (verificará las reglas de `schema.yaml`).
    - Transforma los datos y construye los modelos ejecutando `dbt run`.
 
-6. **Levantar localmente Apache Airflow**
-   - Se puede inicializar la DB de Airflow mediante `airflow db init` y levantar el servidor web/scheduler local, o bien correr todo el empaquetado mediante una imagen de Docker.
+6. **Orquestación con Apache Airflow (`dags/weather_dag.py`)**
+   - El pipeline se orquesta mediante el DAG definido en `dags/weather_dag.py`. Este DAG coordina la ejecución de la extracción de datos, seguida secuencialmente por las transformaciones y pruebas de calidad de datos en dbt (`extract_data >> dbt_run >> dbt_test`).
+   - El DAG está configurado para ejecutarse diariamente (`@daily`).
+   - **Nota sobre la instalación de Airflow**: Es ideal crear un ambiente separado para instalar y ejecutar Apache Airflow. Se sugiere utilizar un entorno aislado de contenedores mediante **Docker** o **OrbStack**, esto último siendo especialmente recomendado si usas macOS con chips Apple Silicon (modelos M1 al M4).
+   - Una vez preparado el ambiente, puedes inicializar la base de datos de Airflow mediante `airflow db init` y levantar el servidor web/scheduler, o bien correr todo empaquetado a través de su imagen de Docker oficial.
